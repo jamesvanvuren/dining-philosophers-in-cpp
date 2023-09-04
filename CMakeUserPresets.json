@@ -1,0 +1,9 @@
+{
+    "version": 4,
+    "vendor": {
+        "conan": {}
+    },
+    "include": [
+        "/home/james/Interviews/dining-philosophers/build/CMakePresets.json"
+    ]
+}
