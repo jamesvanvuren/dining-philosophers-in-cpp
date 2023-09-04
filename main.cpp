@@ -25,8 +25,6 @@ public:
     std::vector<std::unique_ptr<std::thread>> threads;
 };
 
-
-
 class Philosopher
 {
 public:
