@@ -8,9 +8,7 @@
 
 using namespace std; 
 
-
 class Philosopher;
-
 
 class Table
 {
@@ -49,38 +47,34 @@ private:
 
 Philosopher::Philosopher(Table &table, int index): _table(table), _index(index)
 {
-
 }
 
+// Main function for a philosopher thread.
 void Philosopher::operator()()
 {
-
     while (true)
     {
         think();
         eat();
     }
-
 }
 
 void Philosopher::think()
 {
-
+        // Think for a random time.
         unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
         std::default_random_engine generator(seed);
         std::uniform_int_distribution<int> distribution(1, 10000);
 
         cout << "Philosopher " << _index << " thinking.\n";
 
-        // Think.
         std::this_thread::sleep_for(std::chrono::milliseconds{distribution(generator)});
-
 }
 
 void Philosopher::eat()
 {
+    // Acquire mutexes for forks to the left and to the right.
 
-    // Acquire mutexes.
     int left = (_index + Table::N - 1) % Table::N;
     //cout << (_index - 1) << " modulo " << Table::N << " is " << left << endl;
     auto & left_mutex = *(_table.forks[left]);
@@ -89,11 +83,12 @@ void Philosopher::eat()
     //cout << (_index + 1) << " modulo " << Table::N << " is " << right << endl;
     auto & right_mutex = *(_table.forks[right]);
 
+    // Lock the mutexes.
     std::scoped_lock lck { left_mutex, right_mutex };
 
+    // Eat for a random time.
     cout << "Philosopher " << _index << " eating.\n";
 
-    // Eat.
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
     std::uniform_int_distribution<int> distribution(1, 10000);
@@ -101,15 +96,7 @@ void Philosopher::eat()
     std::this_thread::sleep_for(std::chrono::milliseconds{distribution(generator)});
 
     // Release mutexes.
-
 }
-
-
-
-
-
-
-
 
 Table::Table()
 {
@@ -122,31 +109,31 @@ Table::Table()
     forks.reserve(N);
     for(int i = 0; i < N; i++)
     {
-        //forks.push_back(std::make_unique<std::mutex>());
-        // Is this any better?
+        // forks.push_back(std::make_unique<std::mutex>());
+        // Is this any better? Debug to find out.
         forks.emplace_back(std::move(std::make_unique<std::mutex>()));
     }
 }
 
 void Table::serve()
 {
-
+    // Start the philosopher threads.
     for(int i = 0; i < N; i++)
     {
-        //threads.push_back(std::make_unique<std::thread>(philosophers[i]));
+        // threads.push_back(std::make_unique<std::thread>(philosophers[i]));
+        // Is this any better? Debug to find out.
         threads.emplace_back(std::move(std::make_unique<std::thread>(philosophers[i])));
     }
 
+    // Wait for all threads to finish.
     for(int i = 0; i < N; i++)
     {
         threads[i]->join();
     }
 }
 
-
 int main()
 {
-
     try
     {
         Table table;
